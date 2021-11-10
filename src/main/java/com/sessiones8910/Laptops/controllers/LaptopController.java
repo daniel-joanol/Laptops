@@ -76,6 +76,7 @@ public class LaptopController {
     }
 
     @DeleteMapping(ROOT + "/" + "{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @ApiOperation("Borra un laptop a partir del ID pasado como parametro en la URL")
     public ResponseEntity delete(@PathVariable Long id){
         ResponseEntity result = laptopService.delete(id);
