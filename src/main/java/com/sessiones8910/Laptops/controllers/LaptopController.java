@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -17,7 +18,7 @@ import java.util.List;
 @RestController
 public class LaptopController {
 
-    private final String ROOT = "/api/v1/laptops/";
+    private final String ROOT = "/api/v1/laptops";
     private final Logger log = LoggerFactory.getLogger(LaptopController.class);
     private LaptopService laptopService;
 
@@ -33,19 +34,21 @@ public class LaptopController {
         System.out.println(message);
     }
 
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping(ROOT)
     @ApiOperation("Busca todos los laptops de la DB")
     public List<Laptop> findAll(){
         return laptopService.findAll();
     }
 
-    @GetMapping(ROOT + "{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @GetMapping(ROOT + "/" + "{id}")
     @ApiOperation("Busca un laptop por clave primaria ID")
     public ResponseEntity<Laptop> findOneById(@PathVariable Long id){
         return laptopService.findOneById(id);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(ROOT)
     @ApiOperation("Crea un objeto laptop a partir de un JSON")
     public ResponseEntity<Laptop> create(@RequestBody Laptop laptop){
@@ -58,6 +61,7 @@ public class LaptopController {
     }
 
     @PutMapping(ROOT)
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @ApiOperation("Actualiza un objeto laptop a partir de un JSON")
     public ResponseEntity<Laptop> updateBook(@RequestBody Laptop laptop){
         ResponseEntity<Laptop> result = laptopService.update(laptop);
@@ -71,7 +75,7 @@ public class LaptopController {
         return result;
     }
 
-    @DeleteMapping(ROOT + "{id}")
+    @DeleteMapping(ROOT + "/" + "{id}")
     @ApiOperation("Borra un laptop a partir del ID pasado como parametro en la URL")
     public ResponseEntity delete(@PathVariable Long id){
         ResponseEntity result = laptopService.delete(id);
@@ -83,7 +87,8 @@ public class LaptopController {
     }
 
     @ApiIgnore
-    @DeleteMapping(ROOT + "restartDB/")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    @DeleteMapping(ROOT + "/" + "restartDB")
     public ResponseEntity deleteAll(@RequestHeader HttpHeaders headers){
         ResponseEntity result = laptopService.deleteAll();
 
